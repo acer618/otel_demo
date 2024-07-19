@@ -11,10 +11,7 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.incubator.propagation.ExtendedContextPropagators;
 import io.opentelemetry.api.incubator.trace.ExtendedSpanBuilder;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.SpanKind;
-import io.opentelemetry.api.trace.StatusCode;
-import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.api.trace.*;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.Scope;
@@ -34,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
-
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 public final class HttpServer {
@@ -47,7 +42,7 @@ public final class HttpServer {
 
   private static final int port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
   private static final int ads_search_port = Integer.parseInt(System.getProperty("ADS_SEARCH_PORT"));
-
+  private static String CURRENT_PARENT_ID = "";
   private final com.sun.net.httpserver.HttpServer server;
 
   private static final TextMapGetter<Map<String, String>> TEXT_MAP_GETTER =
@@ -68,6 +63,10 @@ public final class HttpServer {
     this(port);
   }
 
+  public static String get_current_parent_id() {
+      return CURRENT_PARENT_ID;
+  }
+
   private HttpServer(int port) throws IOException {
     server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress(port), 0);
     // Test urls
@@ -84,6 +83,7 @@ public final class HttpServer {
       Map<String, String> headersMap = exchange.getRequestHeaders().entrySet().stream()
               .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
       System.out.println(headersMap);
+      System.out.println();
 
       //Solve this in a better way. Why do all headers start with an uppercase character?
       if (headersMap.containsKey("Traceparent")) {
@@ -108,9 +108,9 @@ public final class HttpServer {
                       span.setAttribute("http.host", "localhost:" + HttpServer.port);
                       span.setAttribute("http.target", "/businesses");
                       // Process the request
-                      //getBusinesses(exchange, span);
                       getAds(exchange, span);
-                      System.out.println(span);
+                      System.out.println("SERVER span:" + span);
+                      System.out.println();
                     });
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -119,8 +119,7 @@ public final class HttpServer {
 
     private void getBusinesses(HttpExchange exchange, Span span) throws IOException {
       // Generate an Event
-      System.out.println("Start Processing...");
-      span.addEvent("Start Processing");
+      span.addEvent("Start getting businesses");
 
       // Process the request
       String response = "Restaurant 1";
@@ -137,13 +136,18 @@ public final class HttpServer {
 
     private void getAds(HttpExchange exchange, Span span) throws IOException, URISyntaxException {
           // Generate an Event
-          span.addEvent("Start getting businesses");
+          span.addEvent("Start getting Ads");
 
           //get ads
           //String response = getAds();
 
-          String response = "{'name': 'restaurant1'}";
+          String response = "";
           // Process the request
+          try {
+              response = makeRequest();
+          } catch (Exception e) {
+              System.out.println(e);
+          }
           //exchange.getResponseHeaders().set("Content-Type", "application/json");
           exchange.sendResponseHeaders(200, response.length());
           OutputStream os = exchange.getResponseBody();
@@ -156,14 +160,16 @@ public final class HttpServer {
           span.addEvent("Finish Processing", eventAttributes);
       }
 
-      private String getAds() throws IOException, URISyntaxException {
+      private String makeRequest() throws IOException, URISyntaxException {
           URL url = new URL("http://127.0.0.1:" + ads_search_port + "/ads");
           HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
           int status = 0;
           StringBuilder content = new StringBuilder();
 
+          CURRENT_PARENT_ID = Span.fromContext(Context.current()).getSpanContext().getSpanId();
           Span span = tracer.spanBuilder("getAds").setSpanKind(SpanKind.CLIENT).startSpan();
+
           try (Scope scope = span.makeCurrent()) {
               span.setAttribute("http.method", "GET");
               span.setAttribute("component", "http");
@@ -204,9 +210,12 @@ public final class HttpServer {
 
               } catch (Exception e) {
                   span.setStatus(StatusCode.ERROR, "HTTP Code: " + status);
+                  throw e;
               }
           } finally {
+              System.out.println("CLIENT span:");
               System.out.println(span);
+              System.out.println();
               span.end();
           }
 

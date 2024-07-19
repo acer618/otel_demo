@@ -7,6 +7,7 @@ package org.example.propagation;
 
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanContext;
+
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapSetter;
 
@@ -51,7 +52,9 @@ final class B3PropagatorInjectorMultipleHeaders implements B3PropagatorInjector 
        Issue: SpanContext interface does not have getParentId
       https://github.com/open-telemetry/opentelemetry-java/blob/3fa57f9280ff73bc74525f0e773eaef9b2ab9489/api/all/src/main/java/io/opentelemetry/api/trace/SpanContext.java#L27
     */
-    //setter.set(carrier, PARENT_SPAN_ID_HEADER, spanContext.getParentId());
+
+    setter.set(carrier, PARENT_SPAN_ID_HEADER, org.example.HttpServer.get_current_parent_id());
+    System.out.println("Outgoing X-B3-Parent-Span-Id:" + org.example.HttpServer.get_current_parent_id());
     setter.set(carrier, SPAN_ID_HEADER, spanContext.getSpanId());
     setter.set(carrier, SAMPLED_HEADER, sampled);
   }
