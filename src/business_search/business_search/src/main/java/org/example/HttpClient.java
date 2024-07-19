@@ -36,10 +36,10 @@ public final class HttpClient {
 
   private static final Tracer tracer =
       openTelemetry.getTracer("io.opentelemetry.example.http.HttpClient");
-  private static final int port = Integer.parseInt(System.getProperty("SERVER_PORT"));
+  private static final int port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
 
   private void makeRequest() throws IOException, URISyntaxException {
-    URL url = new URL("http://127.0.0.1:" + port + "/rolldice");
+    URL url = new URL("http://127.0.0.1:" + port + "/api/businesses");
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
     int status = 0;
@@ -47,7 +47,7 @@ public final class HttpClient {
 
     // Name convention for the Span is not yet defined.
     // See: https://github.com/open-telemetry/opentelemetry-specification/issues/270
-    Span span = tracer.spanBuilder("/").setSpanKind(SpanKind.CLIENT).startSpan();
+    Span span = tracer.spanBuilder("/api/businesses").setSpanKind(SpanKind.CLIENT).startSpan();
     try (Scope scope = span.makeCurrent()) {
       span.setAttribute("http.method", "GET");
       span.setAttribute("component", "http");
@@ -66,33 +66,10 @@ public final class HttpClient {
 
       span.setAttribute("url.full", url.toString());
 
-      // Inject the request with the current Context/Span.
       ContextPropagators contextPropagators =
               ContextPropagators.create(
                       TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), B3Propagator.injectingMultiHeaders()));
 
-      // Inject the request with the current Context/Span.
-      /*
-      Map<String, String> carrier = new HashMap<>();
-      contextPropagators
-              .getTextMapPropagator()
-              .inject(
-                      Context.current(),
-                      carrier,
-                      (map, key, value) -> {
-                        if (map != null) {
-                          map.put(key, value);
-                          System.out.println(key + ":" + value);
-                        }
-                      });
-      carrier.forEach(con::setRequestProperty);
-      */
-
-      //Use this instead of above code. ^^ did this for debugging
-      /*
-         TODO:
-         Otel instrumented services should propagate both W3CTraceContext and X-B3 headers.
-      */
       ExtendedContextPropagators.getTextMapPropagationContext(contextPropagators)
               .forEach(con::setRequestProperty);
 

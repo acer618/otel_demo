@@ -38,6 +38,8 @@ dependencies {
     implementation("io.opentelemetry:opentelemetry-semconv:1.30.1-alpha")
     implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure:1.39.0")
     implementation("io.opentelemetry:opentelemetry-api-incubator:1.39.0-alpha")
+
+    implementation("com.google.code.gson:gson:2.9.0")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

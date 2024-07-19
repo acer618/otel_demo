@@ -9,25 +9,32 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.propagation.ExtendedContextPropagators;
 import io.opentelemetry.api.incubator.trace.ExtendedSpanBuilder;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
+import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.Context;
+import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import org.example.propagation.B3Propagator;
 
 import javax.annotation.Nullable;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.google.gson.Gson;
 
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
@@ -38,7 +45,9 @@ public final class HttpServer {
   private static final Tracer tracer =
       openTelemetry.getTracer("io.opentelemetry.example.http.HttpServer");
 
-  private static final int port = Integer.parseInt(System.getProperty("SERVER_PORT"));
+  private static final int port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
+  private static final int ads_search_port = Integer.parseInt(System.getProperty("ADS_SEARCH_PORT"));
+
   private final com.sun.net.httpserver.HttpServer server;
 
   private static final TextMapGetter<Map<String, String>> TEXT_MAP_GETTER =
@@ -62,12 +71,12 @@ public final class HttpServer {
   private HttpServer(int port) throws IOException {
     server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress(port), 0);
     // Test urls
-    server.createContext("/", new HelloHandler());
+    server.createContext("/api/businesses", new SearchHandler());
     server.start();
     System.out.println("Server ready on http://127.0.0.1:" + port);
   }
 
-  private static class HelloHandler implements HttpHandler {
+  private static class SearchHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -81,59 +90,40 @@ public final class HttpServer {
           headersMap.put("traceparent", headersMap.get("Traceparent"));
         }
 
-        /*
-            TODO:
-            Verify that a Composite Propagator with W3cTracePropagator and B3Propagator will work and the order won't matter
-            as long as both extractors set context the same way:
-
-            W3cTracePropagator
-            - span_id = spanid from tracestate header
-
-            B3Propagator
-            - span_id = x-b3-span-id header
-
-         */
         ContextPropagators contextPropagators = ContextPropagators.create(TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), B3Propagator.injectingMultiHeaders()));
         Context context = contextPropagators.getTextMapPropagator().extract(Context.current(), headersMap, TEXT_MAP_GETTER );
 
-      /*
-         TODO: 
-         The code below creates a SERVER span by invoking startSpan() here:
-         https://github.com/open-telemetry/opentelemetry-java/blob/3fa57f9280ff73bc74525f0e773eaef9b2ab9489/sdk/trace/src/main/java/io/opentelemetry/sdk/trace/SdkSpanBuilder.java#L190
-         Issue: Based on the otel spec a new span id is generated but based on X-B3 zipkin headers the spanId needs to be shared with the remote client span id.
-         
-         A new implementation for TraceProvider and SDKSpanBuilder may be needed but there might be other related classes that might have to be implemented.
-         
-         Alternative: Can we do this instead? (aligns with the otel spec and we might be able to see the traces fine in Jaeger)
-         span_id= generateNewId()
-         parent_span_id = x-b3-span-id
-       */
-      ((ExtendedSpanBuilder)
-              ((ExtendedSpanBuilder) tracer.spanBuilder("GET /"))
-                  .setParent(context)
-                  .setSpanKind(SpanKind.SERVER))
-          .startAndRun(
-              () -> {
-                // Set the Semantic Convention
-                Span span = Span.current();
-                span.setAttribute("component", "http");
-                span.setAttribute("http.method", "GET");
-                span.setAttribute("http.scheme", "http");
-                span.setAttribute("http.host", "localhost:" + HttpServer.port);
-                span.setAttribute("http.target", "/");
-                // Process the request
-                answer(exchange, span);
-                System.out.println(span);
-              });
+        try {
+            ((ExtendedSpanBuilder)
+                    tracer.spanBuilder("GET /api/businesses")
+                        .setParent(context)
+                        .setSpanKind(SpanKind.SERVER))
+                .startAndRun(
+                    () -> {
+                      // Set the Semantic Convention
+                      Span span = Span.current();
+                      span.setAttribute("component", "http");
+                      span.setAttribute("http.method", "GET");
+                      span.setAttribute("http.scheme", "http");
+                      span.setAttribute("http.host", "localhost:" + HttpServer.port);
+                      span.setAttribute("http.target", "/businesses");
+                      // Process the request
+                      //getBusinesses(exchange, span);
+                      getAds(exchange, span);
+                      System.out.println(span);
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void answer(HttpExchange exchange, Span span) throws IOException {
+    private void getBusinesses(HttpExchange exchange, Span span) throws IOException {
       // Generate an Event
       System.out.println("Start Processing...");
       span.addEvent("Start Processing");
 
       // Process the request
-      String response = "Hello World!";
+      String response = "Restaurant 1";
       exchange.sendResponseHeaders(200, response.length());
       OutputStream os = exchange.getResponseBody();
       os.write(response.getBytes(Charset.defaultCharset()));
@@ -144,8 +134,88 @@ public final class HttpServer {
       Attributes eventAttributes = Attributes.of(stringKey("answer"), response);
       span.addEvent("Finish Processing", eventAttributes);
     }
-  }
 
+    private void getAds(HttpExchange exchange, Span span) throws IOException, URISyntaxException {
+          // Generate an Event
+          span.addEvent("Start getting businesses");
+
+          //get ads
+          //String response = getAds();
+
+          String response = "{'name': 'restaurant1'}";
+          // Process the request
+          //exchange.getResponseHeaders().set("Content-Type", "application/json");
+          exchange.sendResponseHeaders(200, response.length());
+          OutputStream os = exchange.getResponseBody();
+          os.write(response.getBytes(Charset.defaultCharset()));
+          os.close();
+          System.out.println("Served Client: " + exchange.getRemoteAddress());
+
+          // Generate an Event with an attribute
+          Attributes eventAttributes = Attributes.of(stringKey("answer"), response);
+          span.addEvent("Finish Processing", eventAttributes);
+      }
+
+      private String getAds() throws IOException, URISyntaxException {
+          URL url = new URL("http://127.0.0.1:" + ads_search_port + "/ads");
+          HttpURLConnection con = (HttpURLConnection) url.openConnection();
+
+          int status = 0;
+          StringBuilder content = new StringBuilder();
+
+          Span span = tracer.spanBuilder("getAds").setSpanKind(SpanKind.CLIENT).startSpan();
+          try (Scope scope = span.makeCurrent()) {
+              span.setAttribute("http.method", "GET");
+              span.setAttribute("component", "http");
+
+              URI uri = url.toURI();
+              url =
+                      new URI(
+                              uri.getScheme(),
+                              null,
+                              uri.getHost(),
+                              uri.getPort(),
+                              uri.getPath(),
+                              uri.getQuery(),
+                              uri.getFragment())
+                              .toURL();
+
+              span.setAttribute("url.full", url.toString());
+              ContextPropagators contextPropagators =
+                      ContextPropagators.create(
+                              TextMapPropagator.composite(W3CTraceContextPropagator.getInstance(), B3Propagator.injectingMultiHeaders()));
+
+              ExtendedContextPropagators.getTextMapPropagationContext(contextPropagators)
+                      .forEach(con::setRequestProperty);
+
+              try {
+                  // Process the request
+                  con.setRequestMethod("GET");
+                  status = con.getResponseCode();
+
+                  BufferedReader in =
+                          new BufferedReader(
+                                  new InputStreamReader(con.getInputStream(), Charset.defaultCharset()));
+                  String inputLine;
+                  while ((inputLine = in.readLine()) != null) {
+                      content.append(inputLine);
+                  }
+                  in.close();
+
+              } catch (Exception e) {
+                  span.setStatus(StatusCode.ERROR, "HTTP Code: " + status);
+              }
+          } finally {
+              System.out.println(span);
+              span.end();
+          }
+
+          // Output the result of the request
+          System.out.println("Response Code: " + status);
+          System.out.println("Response Msg: " + content);
+          return content.toString();
+      }
+    }
   private void stop() {
     server.stop(0);
   }
