@@ -6,15 +6,12 @@
 package org.example.propagation;
 
 import io.opentelemetry.api.internal.StringUtils;
-import io.opentelemetry.api.trace.SpanContext;
-import io.opentelemetry.api.trace.SpanId;
-import io.opentelemetry.api.trace.TraceFlags;
-import io.opentelemetry.api.trace.TraceId;
-import io.opentelemetry.api.trace.TraceState;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import io.opentelemetry.api.trace.*;
+
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This set of common propagator utils is currently only used by the OtTracePropagator and the

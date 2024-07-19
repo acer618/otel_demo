@@ -10,11 +10,11 @@ import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapSetter;
 
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.Immutable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 
 import static org.example.propagation.B3Propagator.*;
 

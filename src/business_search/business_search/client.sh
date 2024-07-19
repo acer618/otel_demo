@@ -12,5 +12,5 @@ while IFS='=' read -r key value; do
     JAVA_OPTS="$JAVA_OPTS -D$key=$value"
 done < "$PROPERTIES_FILE"
 
-java $JAVA_OPTS -cp build/libs/propagation-all.jar org.example.HttpClient
+java $JAVA_OPTS -cp build/libs/business_search-all.jar org.example.HttpClient
 

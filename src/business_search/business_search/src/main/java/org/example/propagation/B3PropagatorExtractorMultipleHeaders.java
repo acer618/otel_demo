@@ -9,10 +9,10 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
 
-import java.util.Optional;
-import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 @Immutable
 final class B3PropagatorExtractorMultipleHeaders implements B3PropagatorExtractor {

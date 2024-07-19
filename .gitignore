@@ -3,5 +3,8 @@
 .idea
 *.iml
 
+gradle
+gradlew*
+
 # Ignore Gradle build output directory
 build

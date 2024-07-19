@@ -5,8 +5,6 @@
 
 package org.example;
 
-import static io.opentelemetry.api.common.AttributeKey.stringKey;
-
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import io.opentelemetry.api.OpenTelemetry;
@@ -18,9 +16,8 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.ContextPropagators;
-import io.opentelemetry.context.propagation.TextMapPropagator;
-
 import io.opentelemetry.context.propagation.TextMapGetter;
+import io.opentelemetry.context.propagation.TextMapPropagator;
 import org.example.propagation.B3Propagator;
 
 import javax.annotation.Nullable;
@@ -28,10 +25,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 public final class HttpServer {
   // It's important to initialize your OpenTelemetry SDK as early in your application's lifecycle as

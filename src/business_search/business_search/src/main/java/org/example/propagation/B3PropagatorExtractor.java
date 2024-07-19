@@ -7,9 +7,10 @@ package org.example.propagation;
 
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
-import java.util.Optional;
+
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.util.Optional;
 
 @Immutable
 interface B3PropagatorExtractor {
