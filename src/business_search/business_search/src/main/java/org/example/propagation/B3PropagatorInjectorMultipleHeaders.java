@@ -55,6 +55,7 @@ final class B3PropagatorInjectorMultipleHeaders implements B3PropagatorInjector 
 
     setter.set(carrier, PARENT_SPAN_ID_HEADER, org.example.HttpServer.get_current_parent_id());
     System.out.println("Outgoing X-B3-Parent-Span-Id:" + org.example.HttpServer.get_current_parent_id());
+    System.out.println();
     setter.set(carrier, SPAN_ID_HEADER, spanContext.getSpanId());
     setter.set(carrier, SAMPLED_HEADER, sampled);
   }
