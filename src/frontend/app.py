@@ -5,7 +5,7 @@ from py_zipkin.zipkin import zipkin_span
 from py_zipkin.transport import BaseTransportHandler
 from py_zipkin.zipkin import create_http_headers_for_new_span
 
-business_search_port = 8081
+search_port = 8081
 
 app = Flask(__name__)
 
@@ -30,7 +30,7 @@ def get_business_list():
 @app.route('/search')
 def search():
     with zipkin_span(
-        service_name='business_search', 
+        service_name='search', 
         span_name='GET /search',
         transport_handler=HttpTransport(),
         sample_rate=100.0,
