@@ -5,7 +5,7 @@ from py_zipkin.zipkin import zipkin_span
 from py_zipkin.transport import BaseTransportHandler
 from py_zipkin.zipkin import create_http_headers_for_new_span
 
-business_search_port = 9081
+search_port = "9091"
 frontend_port = 9080
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ def home():
 
 
 def get_business_list():
-    url = "http://localhost:8081/api/businesses"
+    url = "http://localhost:" + search_port + "/api/businesses"
     response = requests.get(
                     headers=create_http_headers_for_new_span(),
                     url=url
@@ -30,7 +30,7 @@ def get_business_list():
 @app.route('/search')
 def search():
     with zipkin_span(
-        service_name='business_search', 
+        service_name='frontend', 
         span_name='GET /search',
         transport_handler=HttpTransport(),
         sample_rate=100.0,
@@ -46,15 +46,14 @@ class HttpTransport(BaseTransportHandler):
         return None
 
     def send(self, encoded_span):
-        # The collector expects a thrift-encoded list of spans.
-        pass
-"""         requests.post(
-            'http://localhost:9411/api/v1/spans',
-            data=encoded_span,
-            headers={'Content-Type': 'application/x-thrift'}, 
-            )
-"""
-        
+        print(encoded_span)
+        response = requests.post(
+           'http://169.254.255.254:9411/api/v1/spans',
+           data=encoded_span,
+           headers={'Content-Type': 'application/json'}, 
+        )
+        print(response)
 
+        
 if __name__ == '__main__':
     app.run(port=frontend_port)

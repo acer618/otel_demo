@@ -4,7 +4,7 @@
 PROPERTIES_FILE=src/main/resources/config.properties
 
 # Read the properties file and construct the -D options
-JAVA_OPTS=""
+JAVA_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 while IFS='=' read -r key value; do
     # Skip lines that are comments or empty
     [[ "$key" =~ ^#.*$ ]] && continue

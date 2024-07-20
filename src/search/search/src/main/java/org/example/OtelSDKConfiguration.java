@@ -15,6 +15,7 @@ import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 
 import java.util.concurrent.TimeUnit;
@@ -48,7 +49,7 @@ class OtelSDKConfiguration {
     SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder()
             .addSpanProcessor(SimpleSpanProcessor.create(new LoggingSpanExporter()))
-            //.addSpanProcessor(BatchSpanProcessor.builder(jaegerOtlpExporter).build())
+            .addSpanProcessor(BatchSpanProcessor.builder(jaegerOtlpExporter).build())
             .setResource(Resource.getDefault().merge(serviceNameResource))
             .build();
 
