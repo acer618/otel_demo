@@ -1,11 +1,11 @@
-from flask import Flask, request
-import requests
+from flask import Flask, request, jsonify
 
 from py_zipkin.zipkin import zipkin_span
 from py_zipkin.transport import BaseTransportHandler
 from py_zipkin.zipkin import create_http_headers_for_new_span
 
-business_search_port = 8081
+
+business_search_port = 8082
 
 app = Flask(__name__)
 
@@ -15,27 +15,26 @@ def home():
 
 
 def get_business_list():
-    url = "http://localhost:8081/api/businesses"
-    response = requests.get(
-                    headers=create_http_headers_for_new_span(),
-                    url=url
-                )
-    print(response)
-    if response.status_code == 200:
-        return response.text
-    else:
-        return "Error: Unable to fetch the business list"
+    return jsonify([
+        {
+            'name': 'Business 1',
+            'location': 'Location 1',
+        },
+        {
+            'name': 'Business 2',
+            'location': 'Location 2',
+        },
+    ])  
 
-@app.route('/search')
-def search():
+@app.route('/businesses')
+def businesses():
     with zipkin_span(
         service_name='business_search', 
-        span_name='GET /search',
+        span_name='GET /businesses',
         transport_handler=HttpTransport(),
-        sample_rate=100.0,
     ):
-        print(request.headers)
-        return get_business_list()
+        print(request.headers)  # Print incoming request headers
+        return get_business_list()   
      
 
 
@@ -56,4 +55,4 @@ class HttpTransport(BaseTransportHandler):
         
 
 if __name__ == '__main__':
-    app.run(port=8080)
+    app.run(port=business_search_port)

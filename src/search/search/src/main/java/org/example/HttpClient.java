@@ -36,7 +36,7 @@ public final class HttpClient {
 
   private static final Tracer tracer =
       openTelemetry.getTracer("io.opentelemetry.example.http.HttpClient");
-  private static final int port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
+  private static final int port = Integer.parseInt(System.getProperty("SEARCH_PORT"));
 
   private void makeRequest() throws IOException, URISyntaxException {
     URL url = new URL("http://127.0.0.1:" + port + "/api/businesses");

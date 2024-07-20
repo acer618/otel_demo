@@ -40,8 +40,11 @@ public final class HttpServer {
   private static final Tracer tracer =
       openTelemetry.getTracer("io.opentelemetry.example.http.HttpServer");
 
-  private static final int port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
-  private static final int ads_search_port = Integer.parseInt(System.getProperty("ADS_SEARCH_PORT"));
+  private static final int port = Integer.parseInt(System.getProperty("SEARCH_PORT"));
+  private static final int business_search_port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
+  //private static final int ad_delivery_port = Integer.parseInt(System.getProperty("AD_DELIVERY_PORT"));
+
+
   private static String CURRENT_PARENT_ID = "";
   private final com.sun.net.httpserver.HttpServer server;
 
@@ -80,13 +83,13 @@ public final class HttpServer {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
 
-      Map<String, String> headersMap = exchange.getRequestHeaders().entrySet().stream()
+        Map<String, String> headersMap = exchange.getRequestHeaders().entrySet().stream()
               .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
-      System.out.println(headersMap);
-      System.out.println();
+        System.out.println(headersMap);
+        System.out.println();
 
-      //Solve this in a better way. Why do all headers start with an uppercase character?
-      if (headersMap.containsKey("Traceparent")) {
+        //Solve this in a better way. Why do all headers start with an uppercase character?
+        if (headersMap.containsKey("Traceparent")) {
           headersMap.put("traceparent", headersMap.get("Traceparent"));
         }
 
@@ -107,8 +110,8 @@ public final class HttpServer {
                       span.setAttribute("http.scheme", "http");
                       span.setAttribute("http.host", "localhost:" + HttpServer.port);
                       span.setAttribute("http.target", "/businesses");
-                      // Process the request
-                      getAds(exchange, span);
+
+                      getBusinesses(exchange, span);
                       System.out.println("SERVER span:" + span);
                       System.out.println();
                     });
@@ -118,50 +121,51 @@ public final class HttpServer {
     }
 
     private void getBusinesses(HttpExchange exchange, Span span) throws IOException {
-      // Generate an Event
-      span.addEvent("Start getting businesses");
+        // Generate an Event
+        span.addEvent("Start getting businesses");
 
-      // Process the request
-      String response = "Restaurant 1";
-      exchange.sendResponseHeaders(200, response.length());
-      OutputStream os = exchange.getResponseBody();
-      os.write(response.getBytes(Charset.defaultCharset()));
-      os.close();
-      System.out.println("Served Client: " + exchange.getRemoteAddress());
+        String response = "{}";
+        try {
+            response = makeRequest("http://127.0.0.1:" + business_search_port + "/businesses");
+        } catch (URISyntaxException e) {
+            System.out.println(e.getMessage());
+        }
+        exchange.sendResponseHeaders(200, response.length());
+        OutputStream os = exchange.getResponseBody();
+        os.write(response.getBytes(Charset.defaultCharset()));
+        os.close();
+        System.out.println("Served Client: " + exchange.getRemoteAddress());
 
-      // Generate an Event with an attribute
-      Attributes eventAttributes = Attributes.of(stringKey("answer"), response);
-      span.addEvent("Finish Processing", eventAttributes);
+        // Generate an Event with an attribute
+        Attributes eventAttributes = Attributes.of(stringKey("answer"), response);
+        span.addEvent("Finish Processing", eventAttributes);
     }
 
     private void getAds(HttpExchange exchange, Span span) throws IOException, URISyntaxException {
-          // Generate an Event
-          span.addEvent("Start getting Ads");
+        // Generate an Event
+        span.addEvent("Start getting Ads");
 
-          //get ads
-          //String response = getAds();
+        String response = "";
+        try {
+            response = makeRequest("http://127.0.0.1:" + "8083" + "/ads");
+        } catch (URISyntaxException e) {
+            System.out.println(e.getMessage());
+        }
 
-          String response = "";
-          // Process the request
-          try {
-              response = makeRequest();
-          } catch (Exception e) {
-              System.out.println(e);
-          }
-          //exchange.getResponseHeaders().set("Content-Type", "application/json");
-          exchange.sendResponseHeaders(200, response.length());
-          OutputStream os = exchange.getResponseBody();
-          os.write(response.getBytes(Charset.defaultCharset()));
-          os.close();
-          System.out.println("Served Client: " + exchange.getRemoteAddress());
+        //exchange.getResponseHeaders().set("Content-Type", "application/json");
+        exchange.sendResponseHeaders(200, response.length());
+        OutputStream os = exchange.getResponseBody();
+        os.write(response.getBytes(Charset.defaultCharset()));
+        os.close();
+        System.out.println("Served Client: " + exchange.getRemoteAddress());
 
-          // Generate an Event with an attribute
-          Attributes eventAttributes = Attributes.of(stringKey("answer"), response);
-          span.addEvent("Finish Processing", eventAttributes);
+        // Generate an Event with an attribute
+        Attributes eventAttributes = Attributes.of(stringKey("answer"), response);
+        span.addEvent("Finish Processing", eventAttributes);
       }
 
-      private String makeRequest() throws IOException, URISyntaxException {
-          URL url = new URL("http://127.0.0.1:" + ads_search_port + "/ads");
+      private String makeRequest(String urlString) throws IOException, URISyntaxException {
+          URL url = new URL(urlString);
           HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
           int status = 0;
