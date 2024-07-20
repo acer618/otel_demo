@@ -1,9 +1,16 @@
 blinker==1.8.2
+certifi==2024.7.4
+charset-normalizer==3.3.2
 click==8.1.7
 Flask==3.0.3
+idna==3.7
 importlib-metadata==7.0.1
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==2.1.5
+py-zipkin==1.2.8
+requests==2.32.3
+typing_extensions==4.12.2
+urllib3==2.2.2
 Werkzeug==3.0.3
 zipp==3.19.0

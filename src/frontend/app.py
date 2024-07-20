@@ -5,7 +5,8 @@ from py_zipkin.zipkin import zipkin_span
 from py_zipkin.transport import BaseTransportHandler
 from py_zipkin.zipkin import create_http_headers_for_new_span
 
-business_search_port = 8081
+business_search_port = 9081
+frontend_port = 9080
 
 app = Flask(__name__)
 
@@ -56,4 +57,4 @@ class HttpTransport(BaseTransportHandler):
         
 
 if __name__ == '__main__':
-    app.run(port=8080)
+    app.run(port=frontend_port)
