@@ -33,12 +33,12 @@ import java.util.stream.Collectors;
 
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
-public final class HttpServer {
+public final class SearchServer {
   // It's important to initialize your OpenTelemetry SDK as early in your application's lifecycle as
   // possible.
-  private static final OpenTelemetry openTelemetry = ExampleConfiguration.initOpenTelemetry();
+  private static final OpenTelemetry openTelemetry = OtelSDKConfiguration.initOpenTelemetry();
   private static final Tracer tracer =
-      openTelemetry.getTracer("io.opentelemetry.example.http.HttpServer");
+      openTelemetry.getTracer("org.example.SearchServer");
 
   private static final int port = Integer.parseInt(System.getProperty("SEARCH_PORT"));
   private static final int business_search_port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
@@ -62,7 +62,7 @@ public final class HttpServer {
             }
           };
 
-  private HttpServer() throws IOException {
+  private SearchServer() throws IOException {
     this(port);
   }
 
@@ -70,7 +70,7 @@ public final class HttpServer {
       return CURRENT_PARENT_ID;
   }
 
-  private HttpServer(int port) throws IOException {
+  private SearchServer(int port) throws IOException {
     server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress(port), 0);
     // Test urls
     server.createContext("/api/businesses", new SearchHandler());
@@ -108,7 +108,7 @@ public final class HttpServer {
                       span.setAttribute("component", "http");
                       span.setAttribute("http.method", "GET");
                       span.setAttribute("http.scheme", "http");
-                      span.setAttribute("http.host", "localhost:" + HttpServer.port);
+                      span.setAttribute("http.host", "localhost:" + SearchServer.port);
                       span.setAttribute("http.target", "/businesses");
 
                       getBusinesses(exchange, span);
@@ -240,7 +240,7 @@ public final class HttpServer {
    * @throws Exception Something might go wrong.
    */
   public static void main(String[] args) throws Exception {
-    final HttpServer s = new HttpServer();
+    final SearchServer s = new SearchServer();
     // Gracefully close the server
     Runtime.getRuntime().addShutdownHook(new Thread(s::stop));
   }

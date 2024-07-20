@@ -28,14 +28,14 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 
-public final class HttpClient {
+public final class SearchClient {
 
   // it's important to initialize the OpenTelemetry SDK as early in your applications lifecycle as
   // possible.
-  private static final OpenTelemetry openTelemetry = ExampleConfiguration.initOpenTelemetry();
+  private static final OpenTelemetry openTelemetry = OtelSDKConfiguration.initOpenTelemetry();
 
   private static final Tracer tracer =
-      openTelemetry.getTracer("io.opentelemetry.example.http.HttpClient");
+      openTelemetry.getTracer("org.example.SearchClient");
   private static final int port = Integer.parseInt(System.getProperty("SEARCH_PORT"));
 
   private void makeRequest() throws IOException, URISyntaxException {
@@ -106,7 +106,7 @@ public final class HttpClient {
    * @param args It is not required.
    */
   public static void main(String[] args) {
-    HttpClient httpClient = new HttpClient();
+    SearchClient httpClient = new SearchClient();
 
     // Perform request every 5s
     Thread t =

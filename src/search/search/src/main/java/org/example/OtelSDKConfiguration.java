@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  * All SDK management takes place here, away from the instrumentation code, which should only access
  * the OpenTelemetry APIs.
  */
-class ExampleConfiguration {
+class OtelSDKConfiguration {
 
   /**
    * Initializes the OpenTelemetry SDK with
