@@ -2,6 +2,8 @@ from flask import Flask, request
 import requests
 
 from py_zipkin.zipkin import zipkin_span
+from py_zipkin.zipkin import Kind
+from py_zipkin.zipkin import Endpoint
 from py_zipkin.transport import BaseTransportHandler
 from py_zipkin.zipkin import create_http_headers_for_new_span
 
@@ -17,15 +19,22 @@ def home():
 
 def get_business_list():
     url = "http://localhost:" + search_port + "/api/businesses"
-    response = requests.get(
-                    headers=create_http_headers_for_new_span(),
-                    url=url
-                )
-    print(response)
-    if response.status_code == 200:
-        return response.text
-    else:
-        return "Error: Unable to fetch the business list"
+    with zipkin_span(
+        service_name='frontend', 
+        span_name='GET /api/businesses',
+    ) as zipkin_context:
+        zipkin_context.kind = Kind.CLIENT
+        zipkin_context.remote_endpoint = Endpoint(service_name='search', port=search_port, ipv4='', ipv6='')
+        response = requests.get(
+                        headers=create_http_headers_for_new_span(),
+                        url=url
+                    )
+        
+        print(response)
+        if response.status_code == 200:
+            return response.text
+        else:
+            return "Error: Unable to fetch the business list"
 
 @app.route('/search')
 def search():
@@ -34,8 +43,9 @@ def search():
         span_name='GET /search',
         transport_handler=HttpTransport(),
         sample_rate=100.0,
-    ):
+    ) as zipkin_context:
         print(request.headers)
+        zipkin_context.kind = Kind.SERVER
         return get_business_list()
      
 
