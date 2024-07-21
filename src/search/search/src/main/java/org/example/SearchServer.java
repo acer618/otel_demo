@@ -42,7 +42,7 @@ public final class SearchServer {
 
   private static final int port = Integer.parseInt(System.getProperty("SEARCH_PORT"));
   private static final int business_search_port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
-  //private static final int ad_delivery_port = Integer.parseInt(System.getProperty("AD_DELIVERY_PORT"));
+  private static final int ad_delivery_port = Integer.parseInt(System.getProperty("AD_DELIVERY_PORT"));
 
 
   private static String CURRENT_PARENT_ID = "";
@@ -126,7 +126,7 @@ public final class SearchServer {
 
         String response = "{}";
         try {
-            response = makeRequest("http://127.0.0.1:" + business_search_port + "/businesses");
+            response = makeRequest("http://127.0.0.1:" + business_search_port, "/businesses");
         } catch (URISyntaxException e) {
             System.out.println(e.getMessage());
         }
@@ -147,7 +147,7 @@ public final class SearchServer {
 
         String response = "";
         try {
-            response = makeRequest("http://127.0.0.1:" + "8083" + "/ads");
+            response = makeRequest("http://127.0.0.1:" + ad_delivery_port , "/ads");
         } catch (URISyntaxException e) {
             System.out.println(e.getMessage());
         }
@@ -164,15 +164,15 @@ public final class SearchServer {
         span.addEvent("Finish Processing", eventAttributes);
       }
 
-      private String makeRequest(String urlString) throws IOException, URISyntaxException {
-          URL url = new URL(urlString);
+      private String makeRequest(String endpoint, String route) throws IOException, URISyntaxException {
+          URL url = new URL(endpoint + route);
           HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
           int status = 0;
           StringBuilder content = new StringBuilder();
 
           CURRENT_PARENT_ID = Span.fromContext(Context.current()).getSpanContext().getSpanId();
-          Span span = tracer.spanBuilder("getAds").setSpanKind(SpanKind.CLIENT).startSpan();
+          Span span = tracer.spanBuilder(route).setSpanKind(SpanKind.CLIENT).startSpan();
 
           try (Scope scope = span.makeCurrent()) {
               span.setAttribute("http.method", "GET");
