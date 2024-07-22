@@ -51,7 +51,30 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.App"
+    mainClass = "org.example.SearchServer"
+}
+
+tasks.register<JavaExec> ("runShadowJar") {
+    group = "application"
+    description = "Run the application using the shadow jar"
+    dependsOn(tasks.shadowJar)
+
+    // Set the main class for the shadow jar
+    mainClass.set("org.example.SearchServer")
+ 
+    // Set the path to the shadow jar
+    val shadowJar = tasks.shadowJar.get().archiveFile.get().asFile
+    classpath = files(shadowJar)
+
+    environment("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT","http://169.254.255.254:4318/v1/traces")
+    environment("SEARCH_PORT","9091")
+    environment("BUSINESS_SEARCH_PORT","9082");
+    environment("AD_DELIVERY_PORT","9083")
+  
+    // Ensure the shadow jar task runs before this one
+    doFirst {
+        println("Running the application with shadow jar: $shadowJar")
+    }
 }
 
 tasks.named<Test>("test") {

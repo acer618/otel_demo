@@ -40,9 +40,9 @@ public final class SearchServer {
   private static final Tracer tracer =
       openTelemetry.getTracer("org.example.SearchServer");
 
-  private static final int port = Integer.parseInt(System.getProperty("SEARCH_PORT"));
-  private static final int business_search_port = Integer.parseInt(System.getProperty("BUSINESS_SEARCH_PORT"));
-  private static final int ad_delivery_port = Integer.parseInt(System.getProperty("AD_DELIVERY_PORT"));
+  private static final int port = Integer.parseInt(System.getenv("SEARCH_PORT"));
+  private static final int business_search_port = Integer.parseInt(System.getenv("BUSINESS_SEARCH_PORT"));
+  private static final int ad_delivery_port = Integer.parseInt(System.getenv("AD_DELIVERY_PORT"));
 
 
   private static String CURRENT_PARENT_ID = "";

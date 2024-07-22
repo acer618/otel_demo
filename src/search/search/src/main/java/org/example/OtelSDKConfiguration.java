@@ -35,12 +35,12 @@ class OtelSDKConfiguration {
    */
   static OpenTelemetry initOpenTelemetry() {
 
-    String jaegerEndpoint = System.getProperty("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT");
-    // Export traces to Jaeger over OTLP
-    OtlpHttpSpanExporter jaegerOtlpExporter =
+    String otlpEndpoint = System.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT");
+    // Export traces to an OTLP receiver
+    OtlpHttpSpanExporter otlpExporter =
             OtlpHttpSpanExporter.builder()
-                    .setEndpoint(jaegerEndpoint)
-                    .setTimeout(30, TimeUnit.SECONDS)
+                    .setEndpoint(otlpEndpoint)
+                    .setTimeout(5, TimeUnit.SECONDS)
                     .build();
 
     Resource serviceNameResource =
@@ -49,7 +49,7 @@ class OtelSDKConfiguration {
     SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder()
             .addSpanProcessor(SimpleSpanProcessor.create(new LoggingSpanExporter()))
-            .addSpanProcessor(BatchSpanProcessor.builder(jaegerOtlpExporter).build())
+            //.addSpanProcessor(BatchSpanProcessor.builder(otlpExporter).build())
             .setResource(Resource.getDefault().merge(serviceNameResource))
             .build();
 
