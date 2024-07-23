@@ -58,7 +58,7 @@ class HttpTransport(BaseTransportHandler):
     def send(self, encoded_span):
          print(encoded_span)
          response = requests.post(
-            'http://169.254.255.254:9411/api/v1/spans',
+            'http://169.254.255.254:9411/api/v2/spans',
             data=encoded_span,
             headers={'Content-Type': 'application/json'}, 
          )

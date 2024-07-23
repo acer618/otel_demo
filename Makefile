@@ -12,7 +12,8 @@ start:
 	@echo "<TODO> list available service and ports"
 
 .PHONY: stop
-stop:	$(DOCKER_COMPOSE_CMD) down --remove-orphans --volumes
+stop:
+	$(DOCKER_COMPOSE_CMD) down --remove-orphans --volumes
 	@echo ""
 	@echo "Otel demo is stopped"
 
@@ -28,8 +29,7 @@ endif
 ifdef service
 	$(DOCKER_COMPOSE_CMD) stop $(service)
 	$(DOCKER_COMPOSE_CMD) rm --force $(service)
-	$(DOCKER_COMPOSE_CMD) create $(service)
-	$(DOCKER_COMPOSE_CMD) start $(service)
+	$(DOCKER_COMPOSE_CMD) up $(service)
 else
 	@echo "Please provide a service name using `service=[service name]` or `SERVICE=[service name]`"
 endif
@@ -47,8 +47,7 @@ ifdef service
 	$(DOCKER_COMPOSE_CMD) build $(service)
 	$(DOCKER_COMPOSE_CMD) stop $(service)
 	$(DOCKER_COMPOSE_CMD) rm --force $(service)
-	$(DOCKER_COMPOSE_CMD) create $(service)
-	$(DOCKER_COMPOSE_CMD) start $(service)
+	$(DOCKER_COMPOSE_CMD) up $(service)
 else
 	@echo "Please provide a service name using `service=[service name]` or `SERVICE=[service name]`"
 endif
