@@ -1,0 +1,22 @@
+networks:
+  default:
+    name: otel-demo
+    driver: bridge
+
+services:
+  # Search 
+  search:
+    image: otel-demo:search
+    container_name: search
+    build:
+      context: ./
+      dockerfile: ./src/search/Dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 300M
+    restart: unless-stopped
+    ports:
+      - 9081
+    environment:
+      - SEARCH_PORT=9081
