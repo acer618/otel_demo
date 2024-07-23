@@ -37,7 +37,5 @@ COPY ./search /usr/src/app/
 # Build the shadowJar
 RUN ./gradlew shadowJar
 
-EXPOSE ${SEARCH_PORT}
-#EXPOSE 9081 
 # Set the entry point to run the application
 ENTRYPOINT ["./gradlew", "runShadowJar"]
