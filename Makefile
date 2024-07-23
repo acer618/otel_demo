@@ -1,5 +1,4 @@
-DOCKER_COMPOSE_CMD ?= docker compose
-DOCKER_COMPOSE_ENV=--env-file .env --env-file .env.override
+DOCKER_COMPOSE_CMD ?= sudo docker-compose
 
 .PHONY: build
 build:
@@ -7,13 +6,13 @@ build:
 
 .PHONY: start 
 start:
-	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) up --force-recreate --remove-orphans --detach
+	$(DOCKER_COMPOSE_CMD) up --force-recreate --remove-orphans --detach
 	@echo ""
 	@echo "Otel demo is running."
 	@echo "<TODO> list available service and ports"
 
 .PHONY: stop
-stop:	$(DOCKER_COMPOSE_CMD) $(DOCKER_COMPOSE_ENV) down --remove-orphans --volumes
+stop:	$(DOCKER_COMPOSE_CMD) down --remove-orphans --volumes
 	@echo ""
 	@echo "Otel demo is stopped"
 

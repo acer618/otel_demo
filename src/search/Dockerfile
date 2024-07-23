@@ -17,13 +17,13 @@ RUN apt-get update && \
 WORKDIR /usr/src/app/
 
 # Copy the Gradle wrapper and configuration files
-COPY ./gradlew /usr/src/app/gradlew
-COPY ./gradle /usr/src/app/gradle
-COPY ./search/build.gradle.kts /usr/src/app/search/build.gradle.kts
-COPY ./settings.gradle.kts /usr/src/app/settings.gradle.kts
+COPY ./src/search/gradlew /usr/src/app/gradlew
+COPY ./src/search/gradle /usr/src/app/gradle
+COPY ./src/search/search/build.gradle.kts /usr/src/app/search/build.gradle.kts
+COPY ./src/search/settings.gradle.kts /usr/src/app/settings.gradle.kts
 
 # Copy the source code
-COPY ./search /usr/src/app/ 
+COPY ./src/search /usr/src/app/ 
 
 # Ensure the Gradle wrapper script has executable permissions
 #RUN chmod +x ./gradlew
