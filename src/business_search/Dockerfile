@@ -1,16 +1,26 @@
-FROM docker-images.yelpcorp.com/jammy_yelp:latest
+FROM    docker-images.yelpcorp.com/jammy_yelp:latest
 
-RUN apt-get update \
-     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-     libpython3.9 \
-     && apt-get clean
+# python and uwsgi deps
+RUN     apt-get update \
+        && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            dumb-init \
+#            libcap2 \
+#            libxml2 \
+#            libyaml-0-2 \
+#            python3-distutils \
+	    python3-venv \
+            python3 \
+        && apt-get clean
 
 WORKDIR /usr/src/app/
-COPY ./requirements.txt ./
+RUN     python3 -m venv ./venv 
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Enable venv
+ENV PATH="/usr/src/app/venv/bin:$PATH"
 
-COPY ./src/business_search/ ./
+COPY ./requirements.txt /usr/src/app/requirements.txt
+RUN pip install -r requirements.txt
 
-EXPOSE ${BUSINESS_SEARCH_PORT}
+COPY . .
+
 ENTRYPOINT [ "python", "app.py" ]
