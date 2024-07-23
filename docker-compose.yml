@@ -1,7 +1,7 @@
-networks:
-  default:
-    name: otel-demo
-    driver: bridge
+#networks:
+#  default:
+#    name: otel-demo
+#    driver: bridge
 
 services:
   # Search 
@@ -17,6 +17,6 @@ services:
           memory: 300M
     restart: unless-stopped
     ports:
-      - 9081
+      - ${SEARCH_PORT}
     environment:
-      - SEARCH_PORT=9081
+      - SEARCH_PORT=${SEARCH_PORT}
