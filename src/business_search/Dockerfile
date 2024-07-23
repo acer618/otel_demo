@@ -8,10 +8,9 @@ RUN apt-get update \
 WORKDIR /usr/src/app/
 COPY ./requirements.txt ./
 
-RUN pip install --upgrade pip
-RUN pip install --prefix="/reqs" -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src/business_search/ ./
 
 EXPOSE ${BUSINESS_SEARCH_PORT}
-ENTRYPOINT [ "python", "recommendation_server.py" ]
+ENTRYPOINT [ "python", "app.py" ]
