@@ -1,11 +1,13 @@
 from flask import Flask, request
 import requests
 
+from py_zipkin import get_default_tracer
+from py_zipkin.zipkin import zipkin_client_span
 from py_zipkin.zipkin import zipkin_span
 from py_zipkin.zipkin import Kind
 from py_zipkin.zipkin import Endpoint
 from py_zipkin.transport import BaseTransportHandler
-from py_zipkin.zipkin import create_http_headers_for_new_span
+from py_zipkin.request_helpers import create_http_headers
 
 frontend_port = 8880
 search_port = 9091
@@ -19,13 +21,14 @@ def home():
 
 def get_business_list():
     url = "http://search:9091/api/businesses"
-    with zipkin_span(
+    with zipkin_client_span(
         service_name='frontend', 
         span_name='GET /api/businesses',
     ) as zipkin_context:
         zipkin_context.kind = Kind.CLIENT
         zipkin_context.remote_endpoint = Endpoint(service_name='search', port=search_port, ipv4='', ipv6='')
-        headers=create_http_headers_for_new_span()
+        headers=create_http_headers(zipkin_context, get_default_tracer(), False)
+        print(headers)
         response = requests.get(
                         url=url,
                         headers=headers,
