@@ -44,6 +44,8 @@ public final class SearchServer {
   private static final int business_search_port = Integer.parseInt(System.getenv("BUSINESS_SEARCH_PORT"));
   private static final int ad_delivery_port = Integer.parseInt(System.getenv("AD_DELIVERY_PORT"));
 
+  private static final String business_search_serivce_name = "business_search";
+
 
   private static String CURRENT_PARENT_ID = "";
   private final com.sun.net.httpserver.HttpServer server;
@@ -71,11 +73,10 @@ public final class SearchServer {
   }
 
   private SearchServer(int port) throws IOException {
-    server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress(port), 0);
+    server = com.sun.net.httpserver.HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
     // Test urls
     server.createContext("/api/businesses", new SearchHandler());
     server.start();
-    System.out.println("Server ready on http://127.0.0.1:" + port);
   }
 
   private static class SearchHandler implements HttpHandler {
@@ -126,7 +127,8 @@ public final class SearchServer {
 
         String response = "{}";
         try {
-            response = makeRequest("http://127.0.0.1:" + business_search_port, "/businesses");
+            response = makeRequest("http://" + business_search_serivce_name + ":" + business_search_port, "/businesses");
+            System.out.println(response);
         } catch (URISyntaxException e) {
             System.out.println(e.getMessage());
         }
