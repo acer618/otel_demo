@@ -4,9 +4,9 @@ networks:
     driver: bridge
 
 services:
-  frontend:
+  amokal_frontend:
     image: otel-demo:frontend
-    container_name: frontend
+    container_name: amokal_frontend
     build:
       context: ./
       dockerfile: ./src/frontend/Dockerfile
@@ -21,6 +21,9 @@ services:
       - FRONTEND_PORT=${FRONTEND_PORT}
     networks:
       - otel-demo-network
+    depends_on:
+      search:
+        condition: service_started
 
   search:
     image: otel-demo:search

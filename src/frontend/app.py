@@ -7,7 +7,7 @@ from py_zipkin.zipkin import Endpoint
 from py_zipkin.transport import BaseTransportHandler
 from py_zipkin.zipkin import create_http_headers_for_new_span
 
-frontend_port = "9990"
+frontend_port = 8880
 search_port = "9091"
 
 app = Flask(__name__)
