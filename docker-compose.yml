@@ -1,10 +1,9 @@
-#networks:
-#  default:
-#    name: otel-demo
-#    driver: bridge
-
+networks:
+  otel-demo-network:
+    external: true
+    driver: bridge
 services:
-  # Search 
+  #search 
   search:
     image: otel-demo:search
     container_name: search
@@ -17,6 +16,29 @@ services:
           memory: 300M
     restart: unless-stopped
     ports:
-      - ${SEARCH_PORT}
+      - ${SEARCH_PORT}:${SEARCH_PORT}
     environment:
       - SEARCH_PORT=${SEARCH_PORT}
+      - BUSINESS_SEARCH_PORT=${BUSINESS_SEARCH_PORT}
+    networks:
+      - otel-demo-network
+    depends_on:
+      business_search:
+        condition: service_started
+
+  # business_search service
+  business_search:
+    image: otel-demo:business_search
+    container_name: business-search 
+    build:
+      context: ./
+      dockerfile: ./src/business_search/Dockerfile 
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+    restart: unless-stopped
+    ports:
+      - ${BUSINESS_SEARCH_PORT}:${BUSINESS_SEARCH_PORT}
+    networks:
+      - otel-demo-network

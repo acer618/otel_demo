@@ -10,3 +10,6 @@ gradlew*
 
 build
 venv
+
+# misc
+web_default_containers.json

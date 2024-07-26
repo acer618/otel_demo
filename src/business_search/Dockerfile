@@ -6,6 +6,7 @@ RUN     apt-get update \
             dumb-init \
 	    python3-venv \
             python3 \
+	    iputils-ping \
         && apt-get clean
 
 WORKDIR /usr/src/app/
@@ -14,9 +15,11 @@ RUN     python3 -m venv ./venv
 # Enable venv
 ENV PATH="./venv/bin:$PATH"
 
-COPY ./requirements.txt .
+COPY ./src/business_search/requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY . .
+COPY ./src/business_search/ /usr/src/app
 
-ENTRYPOINT [ "python", "app.py" ]
+#EXPOSE ${BUSINESS_SEARCH_PORT}
+EXPOSE 9082 
+CMD [ "python", "app.py" ]

@@ -9,7 +9,6 @@ start:
 	$(DOCKER_COMPOSE_CMD) up --force-recreate --remove-orphans --detach
 	@echo ""
 	@echo "Otel demo is running."
-	@echo "<TODO> list available service and ports"
 
 .PHONY: stop
 stop:
