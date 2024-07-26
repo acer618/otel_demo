@@ -67,7 +67,7 @@ tasks.register<JavaExec> ("runShadowJar") {
     classpath = files(shadowJar)
 
     environment("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT","http://169.254.255.254:4318/v1/traces")
-    environment("SEARCH_PORT","9081")
+    environment("SEARCH_PORT","9091")
     environment("BUSINESS_SEARCH_PORT","9082");
     environment("AD_DELIVERY_PORT","9083")
   

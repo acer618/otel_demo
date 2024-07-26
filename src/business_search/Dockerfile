@@ -4,23 +4,22 @@ FROM    docker-images.yelpcorp.com/jammy_yelp:latest
 RUN     apt-get update \
         && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             dumb-init \
-#            libcap2 \
-#            libxml2 \
-#            libyaml-0-2 \
-#            python3-distutils \
 	    python3-venv \
             python3 \
+	    iputils-ping \
         && apt-get clean
 
 WORKDIR /usr/src/app/
 RUN     python3 -m venv ./venv 
 
 # Enable venv
-ENV PATH="/usr/src/app/venv/bin:$PATH"
+ENV PATH="./venv/bin:$PATH"
 
-COPY ./requirements.txt /usr/src/app/requirements.txt
+COPY ./src/business_search/requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY . .
+COPY ./src/business_search/ /usr/src/app
 
-ENTRYPOINT [ "python", "app.py" ]
+#EXPOSE ${BUSINESS_SEARCH_PORT}
+EXPOSE 9082 
+CMD [ "python", "app.py" ]
