@@ -8,7 +8,7 @@ from py_zipkin.transport import BaseTransportHandler
 from py_zipkin.zipkin import create_http_headers_for_new_span
 
 frontend_port = 8880
-search_port = "9091"
+search_port = 9091
 
 app = Flask(__name__)
 
@@ -18,16 +18,17 @@ def home():
 
 
 def get_business_list():
-    url = "http://search:" + search_port + "/api/businesses"
+    url = "http://search:9091/api/businesses"
     with zipkin_span(
         service_name='frontend', 
         span_name='GET /api/businesses',
     ) as zipkin_context:
         zipkin_context.kind = Kind.CLIENT
         zipkin_context.remote_endpoint = Endpoint(service_name='search', port=search_port, ipv4='', ipv6='')
+        headers=create_http_headers_for_new_span()
         response = requests.get(
-                        headers=create_http_headers_for_new_span(),
-                        url=url
+                        url=url,
+                        headers=headers,
                     )
         
         print(response)
@@ -35,6 +36,9 @@ def get_business_list():
             return response.text
         else:
             return "Error: Unable to fetch the business list"
+
+def get_business_list1():
+    return "hi"
 
 @app.route('/search')
 def search():

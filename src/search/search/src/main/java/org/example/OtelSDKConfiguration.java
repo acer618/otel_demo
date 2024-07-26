@@ -49,7 +49,7 @@ class OtelSDKConfiguration {
     SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder()
             .addSpanProcessor(SimpleSpanProcessor.create(new LoggingSpanExporter()))
-            //.addSpanProcessor(BatchSpanProcessor.builder(otlpExporter).build())
+            .addSpanProcessor(BatchSpanProcessor.builder(otlpExporter).build())
             .setResource(Resource.getDefault().merge(serviceNameResource))
             .build();
 

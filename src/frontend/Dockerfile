@@ -18,5 +18,7 @@ RUN pip install -r requirements.txt
 
 COPY ./src/frontend/ /usr/src/app
 
+ENV PYTHONUNBUFFERED=1
+
 EXPOSE 8880
 CMD [ "python", "app.py" ]
