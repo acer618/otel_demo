@@ -2,8 +2,8 @@ networks:
   otel-demo-network:
     external: true
     driver: bridge
+
 services:
-  # frontend service
   frontend:
     image: otel-demo:frontend
     container_name: frontend
@@ -21,11 +21,7 @@ services:
       - FRONTEND_PORT=${FRONTEND_PORT}
     networks:
       - otel-demo-network
-    depends_on:
-      business_search:
-        condition: service_started
 
-  #search 
   search:
     image: otel-demo:search
     container_name: search
@@ -48,7 +44,6 @@ services:
       business_search:
         condition: service_started
 
-  # business_search service
   business_search:
     image: otel-demo:business_search
     container_name: business-search 
