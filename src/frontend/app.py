@@ -53,6 +53,7 @@ def search():
     ) as zipkin_context:
         print(request.headers)
         zipkin_context.kind = Kind.SERVER
+        zipkin_context.update_binary_annotations({'app.force_sample': "true"})
         return get_business_list()
      
 
