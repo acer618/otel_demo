@@ -7,8 +7,8 @@ from py_zipkin.zipkin import Endpoint
 from py_zipkin.transport import BaseTransportHandler
 from py_zipkin.zipkin import create_http_headers_for_new_span
 
+frontend_port = "8090"
 search_port = "9091"
-frontend_port = 9080
 
 app = Flask(__name__)
 
@@ -18,7 +18,7 @@ def home():
 
 
 def get_business_list():
-    url = "http://localhost:" + search_port + "/api/businesses"
+    url = "http://search:" + search_port + "/api/businesses"
     with zipkin_span(
         service_name='frontend', 
         span_name='GET /api/businesses',

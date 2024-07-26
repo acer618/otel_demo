@@ -3,6 +3,28 @@ networks:
     external: true
     driver: bridge
 services:
+  # frontend service
+  frontend:
+    image: otel-demo:frontend
+    container_name: frontend
+    build:
+      context: ./
+      dockerfile: ./src/frontend/Dockerfile
+    deploy:
+      resources:
+        limits:
+          memory: 50M
+    restart: unless-stopped
+    ports:
+      - ${FRONTEND_PORT}:${FRONTEND_PORT}
+    environment:
+      - FRONTEND_PORT=${FRONTEND_PORT}
+    networks:
+      - otel-demo-network
+    depends_on:
+      business_search:
+        condition: service_started
+
   #search 
   search:
     image: otel-demo:search
