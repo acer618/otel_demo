@@ -19,5 +19,5 @@ RUN pip install -r requirements.txt
 
 COPY ./src/frontend/ /usr/src/app
 
-EXPOSE 8090
+EXPOSE 9990
 CMD [ "python", "app.py" ]
