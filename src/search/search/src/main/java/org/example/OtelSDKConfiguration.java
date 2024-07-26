@@ -44,7 +44,7 @@ class OtelSDKConfiguration {
                     .build();
 
     Resource serviceNameResource =
-            Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "java-otel-manual-instrumentation-service"));
+            Resource.create(Attributes.of(ResourceAttributes.SERVICE_NAME, "search"));
 
     SdkTracerProvider sdkTracerProvider =
         SdkTracerProvider.builder()
