@@ -3,6 +3,7 @@ This project demonstrates how microservices with different languages and a hybri
 
 
 ![Alt text](images/otel_demo.png?raw=true "Otel Demo Archirecture")
+Note: TODO Ads Service
 
 ## Docker
 To bring up all services
